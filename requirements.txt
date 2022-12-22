@@ -3,5 +3,6 @@ pandas
 matplotlib
 seaborn
 numpy
+scikit-learn
 sklearn
 xgboost
