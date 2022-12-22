@@ -10,6 +10,6 @@ sklearn.inspection
 sklearn.linear_model
 klearn.neighbors
 sklearn.ensemble
-xgboost import
+xgboost
 sklearn.svm
 time
