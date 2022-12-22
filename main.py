@@ -43,9 +43,8 @@ cols1 = ["Temperature", "Humidity", "Measure1", "Measure2", "Measure3", "Measure
         "Measure5", "Measure6", "Measure7", "Measure8", "Measure9", "Measure10", "Measure11", "Measure12",
         "Measure13", "Measure14", "Measure15", "Hours Since Previous Failure"]
 
-train = pd.read_csv("/Users/Luda/PycharmProjects/predictiveMaintenance/input/train.csv", sep=",", names=columns)
-test = pd.read_csv("/Users/Luda/PycharmProjects/predictiveMaintenance/input/test.csv", sep=",", names=columns)
-# test_results = pd.read_csv("/Users/Luda/PycharmProjects/predictiveMaintenance/input/RUL_FD001.txt", sep=" ", header=None)
+train = pd.read_csv("./train.csv", sep=",", names=columns)
+test = pd.read_csv("./test.csv", sep=",", names=columns)
 
 train.drop(index=train.index[0], axis=0, inplace=True)
 
