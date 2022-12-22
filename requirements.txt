@@ -3,12 +3,6 @@ pandas
 matplotlib
 seaborn
 numpy
-sklearn.model_selection
-sklearn.metrics
-sklearn.inspection
-sklearn.linear_model
-klearn.neighbors
-sklearn.ensemble
+sklearn
 xgboost
-sklearn.svm
 time
