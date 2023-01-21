@@ -3,7 +3,7 @@ pandas
 matplotlib
 seaborn
 numpy
-scikit-learn
+scikit-learn==1.2.0
 sklearn
 xgboost
 graphviz
