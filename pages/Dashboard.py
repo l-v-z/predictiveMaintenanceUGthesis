@@ -1,36 +1,136 @@
-import streamlit as st
 import time
-import numpy as np
+import streamlit as st
 import pandas as pd
 import plotly.express as px
 
 st.set_page_config(page_title="Real-Time Data Dashboard", page_icon="Active", layout="wide")
 
-columns = ["UDI", "Product ID", "Process temperature [K]", "Rotational speed [rpm]", "Torque [Nm]", "Tool wear [min]",
-           "Target", "Failure Type"]
-df = pd.read_csv("predictive_maintenance.csv", sep=",", names=columns)
+columns = ["Type", "Air Temperature [°C]", "Process Temperature [°C]", "Rotational Speed [rpm]", "Torque [Nm]",
+           "Tool Wear [min]", "Target", "Failure Type", "DateTime", "RUL_Power Failure", "RUL_Tool Wear Failure",
+           "RUL_Overstrain Failure", "RUL_Heat Dissipation Failure", "Failure Type Prediction"]
 
-job_filter = st.selectbox("Select Failure Type", pd.unique(df["Failure Type"]))
-
-kpi1, kpi2 = st.columns(2)
-
-# fill the column with respect to the KPIs
-kpi1.metric(label="Failure probability", value=round(20.66), delta=round(20.66) - 10)
+cols_num = ["Air Temperature [°C]", "Rotational Speed [rpm]", "Torque [Nm]", "Tool Wear [min]", "RUL_Power Failure",
+            "RUL_Tool Wear Failure", "RUL_Overstrain Failure", "RUL_Heat Dissipation Failure"]
 
 
-kpi2.metric(label="Health", value=int(20.66), delta=10 + 20.66)
+df = pd.read_csv("rul_data.csv", sep=",", names=columns)
+df.drop(index=df.index[0], axis=0, inplace=True)
+
+current_torque = 0
+current_tool_wear = 0
+current_rot_speed = 0
+current_air_temp = 0
+next_pow_fail = 0
+next_tool_wear_fail = 0
+next_overstr_fail = 0
+next_heat_diss_fail = 0
+
+df[cols_num] = df[cols_num].apply(pd.to_numeric)
 
 
-# create columns for the chars
-fig_col1, fig_col2 = st.columns(2)
+placeholder = st.empty()
 
-with fig_col1:
-    st.markdown("Chart 1")
-    fig1 = px.density_heatmap(data_frame=df, y="Failure Type", x="Torque [Nm]")
-    st.write(fig1)
+for i, row in df.iterrows():
 
-with fig_col2:
-    st.markdown("Chart 2")
-    fig2 = px.histogram(data_frame=df, x="Process temperature [K]")
-    st.write(fig2)
+    current_torque = df.loc[i, 'Torque [Nm]']
+    current_tool_wear = df.loc[i, 'Tool Wear [min]']
+    current_rot_speed = df.loc[i, 'Rotational Speed [rpm]']
+    current_air_temp = round(df.loc[i, 'Air Temperature [°C]'], 2)
+    next_pow_fail = df.loc[i, 'RUL_Power Failure']
+    next_tool_wear_fail = df.loc[i, 'RUL_Tool Wear Failure']
+    next_overstr_fail = df.loc[i, 'RUL_Overstrain Failure']
+    next_heat_diss_fail = df.loc[i, 'RUL_Heat Dissipation Failure']
+
+    with placeholder.container():
+
+        n1, n2, n3, n4 = st.columns(4)
+
+        n1.metric(
+        label="Current Torque [Nm]",
+        value=current_torque,
+        delta=round(current_torque - df['Torque [Nm]'].mean()),
+        )
+        n2.metric(
+        label="Current Tool Wear [min]",
+        value=current_tool_wear,
+        delta=round(current_tool_wear - df['Tool Wear [min]'].mean()),
+        )
+
+        n3.metric(
+        label="Current Rotational Speed [rpm] ",
+        value=current_rot_speed,
+        delta=round(current_rot_speed - df['Rotational Speed [rpm]'].mean()),
+        )
+
+        n4.metric(
+        label="Current Air Temperature [°C] ",
+        value=current_air_temp,
+        delta=round(current_air_temp - df['Air Temperature [°C]'].mean()),
+        )
+
+        st.header('')
+        st.divider()
+        st.header('')
+
+        m1, m2, m3, m4 = st.columns(4)
+
+        m2.metric(
+        label="Next Power Failure (hrs)",
+        value=next_pow_fail
+        )
+
+        m4.metric(
+        label="Next Tool Wear Failure (hrs)",
+        value=next_tool_wear_fail
+        )
+
+        m3.metric(
+        label="Next Overstrain Failure (hrs)",
+        value=next_overstr_fail
+        )
+
+        m1.metric(
+        label="Next Heat Dissipation Failure (hrs) ",
+        value=next_heat_diss_fail
+        )
+
+        time.sleep(3)
+
+        st.header('')
+        st.divider()
+        st.header('')
+
+        fig = px.line(df['Torque [Nm]'].iloc[:i + 1], title='Torque over Time')
+        fig.update_traces(line_color='blue')
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.header('')
+        st.divider()
+        st.header('')
+
+        fig = px.line(df['Tool Wear [min]'].iloc[:i + 1], title='Tool Wear over Time')
+        fig.update_traces(line_color='purple')
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.header('')
+        st.divider()
+        st.header('')
+
+        fig = px.line(df['Rotational Speed [rpm]'].iloc[:i + 1], title='Rotational Speed over Time')
+        fig.update_traces(line_color='yellow')
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.header('')
+        st.divider()
+        st.header('')
+
+        fig = px.line(df['Air Temperature [°C]'].iloc[:i + 1], title='Air Temperature °C over Time')
+        fig.update_traces(line_color='red')
+        st.plotly_chart(fig, use_container_width=True)
+
+
+    placeholder.empty()
+
+
+
 
