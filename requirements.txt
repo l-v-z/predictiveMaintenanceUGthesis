@@ -3,7 +3,7 @@ pandas
 matplotlib
 seaborn
 numpy
-sklearn
+scikit-learn
 xgboost
 graphviz
 mlxtend
