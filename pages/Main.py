@@ -372,12 +372,7 @@ st.header('')
 st.subheader('Comparing the models')
 st.header('')
 pd.set_option('display.precision', 2)
-models.sort_values(by='Model Accuracy Score', ascending=False).style.background_gradient(
-       cmap='coolwarm').hide_index().set_properties(**{
-            'font-family': 'Lucida Calligraphy',
-            'color': 'LightGreen',
-            'font-size': '15px'
-        })
+models.sort_values(by='Model Accuracy Score', ascending=False)
 
 st.dataframe(models)
 
