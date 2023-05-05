@@ -3,12 +3,11 @@ pandas
 matplotlib
 seaborn
 numpy
-scikit-learn
+sklearn
 xgboost
 graphviz
 mlxtend
 plotly
 category_encoders
 plotly.express
-re
 
