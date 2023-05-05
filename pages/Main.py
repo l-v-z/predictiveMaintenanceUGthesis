@@ -455,4 +455,4 @@ st.header('Creating RUL predictions for all failure types using the trained mode
 st.header('')
 st.write(rul_data)
 
-rul_data.to_csv('rul_data.csv', index=False)
+# rul_data.to_csv('rul_data.csv', index=False)
