@@ -94,7 +94,7 @@ for i, row in df.iterrows():
         value=next_heat_diss_fail
         )
 
-        time.sleep(3)
+        time.sleep(2)
 
         st.header('')
         st.divider()
@@ -127,7 +127,6 @@ for i, row in df.iterrows():
         fig = px.line(df['Air Temperature [°C]'].iloc[:i + 1], title='Air Temperature °C over Time')
         fig.update_traces(line_color='red')
         st.plotly_chart(fig, use_container_width=True)
-
 
     placeholder.empty()
 
