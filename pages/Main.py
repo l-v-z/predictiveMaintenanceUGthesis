@@ -133,6 +133,8 @@ st.header('')
 
 
 data_numeric = data[cols].copy()
+sample = data.sample(n=1000, random_state=10)
+
 st.subheader('Additional information about the data in each column')
 st.header('')
 st.dataframe(data_numeric.describe().style.background_gradient(cmap='bone'))
@@ -218,6 +220,9 @@ st.header('')
 st.write(data_numeric)
 
 st.header('')
+sample_numeric = data_numeric.sample(n=1000, random_state=10)
+data_numeric = data_numeric.drop(sample_numeric.index)
+
 
 scaler = LabelEncoder()
 data_numeric['Failure Type'] = scaler.fit_transform(data_numeric['Failure Type'])
@@ -378,17 +383,17 @@ st.dataframe(models)
 
 st.header('')
 st.header('')
-st.write('Choosing Random Forest because it has the highest model accuracy score of 98.2%')
+st.write('Choosing XGBoost because it has the highest model accuracy score out of models with balanced accuracy')
 st.header('')
 st.header('')
-st.subheader('Most important features for Random Forest Model:')
+st.subheader('Most important features for XGBoost Model:')
 
-importance = random_forest.feature_importances_
+importance = xgb.feature_importances_
 feature_ranking = sorted(zip(importance, X_data.columns), reverse=True)
 for i, (score, name) in enumerate(feature_ranking):
     st.write("%d. Feature '%s' (%.2f%%)" % (i + 1, name, score*100))
 
-prediction1 = random_forest.predict(X_test)
+prediction1 = xgb.predict(X_test)
 
 cross_checking = pd.DataFrame({'Actual': y_test, 'Predicted': prediction1})
 cross_checking.sample(5).style.background_gradient(
@@ -409,15 +414,14 @@ unique_failure_types.remove('No Failure')
 for failure_type in unique_failure_types:
     data[f'RUL_{failure_type}'] = -1
 
-data_numeric2 = data_numeric.copy()
-data_numeric2.drop(columns=['Failure Type'], inplace=True)
-pred = random_forest.predict(data_numeric2.values)
+sample_numeric.drop(columns=['Failure Type'], inplace=True)
+pred = xgb.predict(sample_numeric.values)
 
 reverse_dict = {v: k for k, v in dict.items()}
 pred = [reverse_dict.get(value, -1) for value in pred]
 
 
-rul_data = data.copy()
+rul_data = sample.copy()
 
 rul_data['Failure Type Prediction'] = pred
 
@@ -426,8 +430,10 @@ rul_data['Failure Type Prediction'] = pred
 for failure_type in unique_failure_types:
     rul_data[f'RUL_{failure_type}'] = -1
 
+rul_data['Row Number'] = range(len(rul_data))
+rul_data = rul_data.set_index('Row Number')
+
 for i in range(len(rul_data)):
-    row = rul_data.iloc[i]
     for failure_type in unique_failure_types:
         next_failure_indices = rul_data[
             (rul_data['Failure Type Prediction'] == failure_type) & (rul_data.index > i)].index.tolist()
@@ -450,4 +456,4 @@ st.header('Creating RUL predictions for all failure types using the trained mode
 st.header('')
 st.write(rul_data)
 
-# rul_data.to_csv('rul_data.csv', index=False)
+rul_data.to_csv('rul_data.csv', index=False)

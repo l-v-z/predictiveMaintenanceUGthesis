@@ -6,8 +6,8 @@ import plotly.express as px
 st.set_page_config(page_title="Real-Time Data Dashboard", page_icon="Active", layout="wide")
 
 columns = ["Type", "Air Temperature [°C]", "Process Temperature [°C]", "Rotational Speed [rpm]", "Torque [Nm]",
-           "Tool Wear [min]", "Target", "Failure Type", "DateTime", "RUL_Power Failure", "RUL_Tool Wear Failure",
-           "RUL_Overstrain Failure", "RUL_Heat Dissipation Failure", "Failure Type Prediction"]
+           "Tool Wear [min]", "Target", "Failure Type", "DateTime", "Failure Type Prediction", "RUL_Power Failure",
+           "RUL_Tool Wear Failure", "RUL_Overstrain Failure", "RUL_Heat Dissipation Failure"]
 
 cols_num = ["Air Temperature [°C]", "Rotational Speed [rpm]", "Torque [Nm]", "Tool Wear [min]", "RUL_Power Failure",
             "RUL_Tool Wear Failure", "RUL_Overstrain Failure", "RUL_Heat Dissipation Failure"]
@@ -15,6 +15,13 @@ cols_num = ["Air Temperature [°C]", "Rotational Speed [rpm]", "Torque [Nm]", "T
 
 df = pd.read_csv("rul_data.csv", sep=",", names=columns)
 df.drop(index=df.index[0], axis=0, inplace=True)
+
+total_rows = len(df)
+matching_rows = len(df[df['Failure Type'] == df['Failure Type Prediction']])
+percentage = (matching_rows / total_rows) * 100
+
+# st.write(f"Percentage of rows where Failure Type and Failure Type Prediction have the same value: {percentage}%")
+
 
 current_torque = 0
 current_tool_wear = 0
@@ -75,22 +82,22 @@ for i, row in df.iterrows():
         m1, m2, m3, m4 = st.columns(4)
 
         m2.metric(
-        label="Next Power Failure (hrs)",
+        label="Next Power Failure (min)",
         value=next_pow_fail
         )
 
         m4.metric(
-        label="Next Tool Wear Failure (hrs)",
+        label="Next Tool Wear Failure (min)",
         value=next_tool_wear_fail
         )
 
         m3.metric(
-        label="Next Overstrain Failure (hrs)",
+        label="Next Overstrain Failure (min)",
         value=next_overstr_fail
         )
 
         m1.metric(
-        label="Next Heat Dissipation Failure (hrs) ",
+        label="Next Heat Dissipation Failure (min) ",
         value=next_heat_diss_fail
         )
 
@@ -108,13 +115,13 @@ for i, row in df.iterrows():
         st.divider()
         st.header('')
 
-        fig = px.line(df['Tool Wear [min]'].iloc[:i + 1], title='Tool Wear over Time')
-        fig.update_traces(line_color='purple')
-        st.plotly_chart(fig, use_container_width=True)
-
-        st.header('')
-        st.divider()
-        st.header('')
+        # fig = px.line(df['Tool Wear [min]'].iloc[:i + 1], title='Tool Wear over Time')
+        # fig.update_traces(line_color='purple')
+        # st.plotly_chart(fig, use_container_width=True)
+        #
+        # st.header('')
+        # st.divider()
+        # st.header('')
 
         fig = px.line(df['Rotational Speed [rpm]'].iloc[:i + 1], title='Rotational Speed over Time')
         fig.update_traces(line_color='yellow')
