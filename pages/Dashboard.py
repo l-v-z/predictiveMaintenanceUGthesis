@@ -20,8 +20,6 @@ total_rows = len(df)
 matching_rows = len(df[df['Failure Type'] == df['Failure Type Prediction']])
 percentage = (matching_rows / total_rows) * 100
 
-# st.write(f"Percentage of rows where Failure Type and Failure Type Prediction have the same value: {percentage}%")
-
 
 current_torque = 0
 current_tool_wear = 0
@@ -75,18 +73,16 @@ for i, row in df.iterrows():
         delta=round(current_air_temp - df['Air Temperature [°C]'].mean()),
         )
 
-        st.header('')
         st.divider()
-        st.header('')
 
         m1, m2, m3, m4 = st.columns(4)
 
-        m2.metric(
+        m1.metric(
         label="Next Power Failure (min)",
         value=next_pow_fail
         )
 
-        m4.metric(
+        m2.metric(
         label="Next Tool Wear Failure (min)",
         value=next_tool_wear_fail
         )
@@ -96,44 +92,34 @@ for i, row in df.iterrows():
         value=next_overstr_fail
         )
 
-        m1.metric(
+        m4.metric(
         label="Next Heat Dissipation Failure (min) ",
         value=next_heat_diss_fail
         )
 
+        st.divider()
+
         time.sleep(2)
 
-        st.header('')
-        st.divider()
-        st.header('')
+        l1, l2, l3 = st.columns(3)
 
-        fig = px.line(df['Torque [Nm]'].iloc[:i + 1], title='Torque over Time')
-        fig.update_traces(line_color='blue')
-        st.plotly_chart(fig, use_container_width=True)
+        with l1:
 
-        st.header('')
-        st.divider()
-        st.header('')
+            fig = px.line(df['Torque [Nm]'].iloc[:i + 1], title='Torque over Time')
+            fig.update_traces(line_color='blue')
+            st.plotly_chart(fig, use_container_width=True)
 
-        # fig = px.line(df['Tool Wear [min]'].iloc[:i + 1], title='Tool Wear over Time')
-        # fig.update_traces(line_color='purple')
-        # st.plotly_chart(fig, use_container_width=True)
-        #
-        # st.header('')
-        # st.divider()
-        # st.header('')
+        with l2:
 
-        fig = px.line(df['Rotational Speed [rpm]'].iloc[:i + 1], title='Rotational Speed over Time')
-        fig.update_traces(line_color='yellow')
-        st.plotly_chart(fig, use_container_width=True)
+            fig = px.line(df['Rotational Speed [rpm]'].iloc[:i + 1], title='Rotational Speed over Time')
+            fig.update_traces(line_color='yellow')
+            st.plotly_chart(fig, use_container_width=True)
 
-        st.header('')
-        st.divider()
-        st.header('')
+        with l3:
 
-        fig = px.line(df['Air Temperature [°C]'].iloc[:i + 1], title='Air Temperature °C over Time')
-        fig.update_traces(line_color='red')
-        st.plotly_chart(fig, use_container_width=True)
+            fig = px.line(df['Air Temperature [°C]'].iloc[:i + 1], title='Air Temperature °C over Time')
+            fig.update_traces(line_color='red')
+            st.plotly_chart(fig, use_container_width=True)
 
     placeholder.empty()
 
