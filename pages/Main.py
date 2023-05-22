@@ -93,15 +93,7 @@ with st.expander('Unique values per column and their counts'):
 
 st.header('')
 st.header('')
-with st.expander('Percentage of zero values in columns'):
 
-    st.header('')
-
-    st.write(data[data == '0'].count(axis=0)/len(data.index)*100)
-    st.caption('')
-
-st.header('')
-st.header('')
 st.write('Checking for rows that have Target = 1 but Failure Type = No Failure')
 df_failure = data[data['Target'] == '1'].copy()
 st.write(df_failure['Failure Type'].value_counts())
