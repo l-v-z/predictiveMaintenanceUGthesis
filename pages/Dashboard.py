@@ -6,7 +6,7 @@ import plotly.express as px
 st.set_page_config(page_title="Real-Time Data Dashboard", layout="wide")
 
 columns = ["Type", "Air Temperature [°C]", "Process Temperature [°C]", "Rotational Speed [rpm]", "Torque [Nm]",
-           "Tool Wear [min]", "Target", "Failure Type", "DateTime", "Failure Type Prediction", "RUL_Power Failure",
+           "Tool Wear [min]", "Failure Type", "DateTime", "Failure Type Prediction", "RUL_Power Failure",
            "RUL_Tool Wear Failure", "RUL_Overstrain Failure", "RUL_Heat Dissipation Failure"]
 
 cols_num = ["Air Temperature [°C]", "Rotational Speed [rpm]", "Torque [Nm]", "Tool Wear [min]", "RUL_Power Failure",

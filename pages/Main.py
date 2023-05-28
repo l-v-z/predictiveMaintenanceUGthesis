@@ -35,18 +35,27 @@ columns = ["UDI", "Product ID", "Type", "Air Temperature [K]", "Process Temperat
            "Torque [Nm]", "Tool Wear [min]", "Target", "Failure Type"]
 
 cols = ["Type", "Air Temperature [°C]", "Process Temperature [°C]", "Rotational Speed [rpm]", "Torque [Nm]",
-        "Tool Wear [min]", "Target", "Failure Type"]
+        "Tool Wear [min]", "Failure Type"]
 
 
 data = pd.read_csv("predictive_maintenance.csv", sep=",", names=columns)
 
 
 st.header('')
-st.header('Exploratory Data Analysis')
+st.header('Data Pre-Processing')
 st.header('')
 st.subheader('Original Data')
 st.header('')
 st.write(data)
+st.header('')
+st.header('')
+
+st.write('Some adjustments needed to be made to the data including removing the columns containing the UDI and '
+         'Product ID, converting air temperatures and process temperatures from Kelvin to Celsius as well as creating '
+         'a DateTime column to convert the data into hourly measurements. Based on the DateTime column another column'
+         ' has been added containing the time elapsed since last failure at the time of the measurement.')
+
+st.header('')
 st.header('')
 
 data.drop(index=data.index[0], axis=0, inplace=True)
@@ -67,32 +76,6 @@ data["Process Temperature [K]"] = data["Process Temperature [K]"] - 272.15
 data.rename(columns={"Air Temperature [K]": "Air Temperature [°C]",
                      "Process Temperature [K]": "Process Temperature [°C]"}, inplace=True)
 
-
-st.write('Some adjustments needed to be made to the data including removing the columns containing the UDI and '
-         'Product ID, converting air temperatures and process temperatures from Kelvin to Celsius, finding their '
-         'difference as well as creating a DateTime column to convert the data into hourly measurements. '
-         'Based on the DateTime column another column has been added containing the time elapsed since last '
-         'failure at the time of the measurement.')
-
-st.header('')
-st.header('')
-st.subheader('Dataframe preview')
-st.header('')
-st.dataframe(data)
-st.header('')
-st.header('')
-
-
-with st.expander('Unique values per column and their counts'):
-
-    st.header('')
-
-    for col in cols:
-        st.subheader(col)
-        st.write(data[col].value_counts())
-
-st.header('')
-st.header('')
 
 st.write('Checking for rows that have Target = 1 but Failure Type = No Failure')
 df_failure = data[data['Target'] == '1'].copy()
@@ -119,10 +102,38 @@ index_possible_failure = df_failure[df_failure['Failure Type'] == 'Random Failur
 data.drop(index_possible_failure, axis=0, inplace=True)
 
 data.reset_index(inplace=True, drop=True)
+st.header('')
+
+st.write('Failure percentage in data')
+st.write(data['Target'].value_counts(normalize=1) * 100)
+st.header('')
+st.write('The data appears to be extremely unbalanced in regards to the amount of recorded failures so it will need '
+         'to be oversampled')
+st.write('In order to avoid a data leak we will have to remove either Target or Failure Types. I have chosen to keep'
+         ' Failure types as it provides more detailed information on the nature of the failures.')
+
+data.drop(columns=['Target'], inplace=True)
+
 
 st.header('')
 st.header('')
 
+
+st.header('')
+st.header('Exploratory Data Analysis')
+st.header('')
+
+
+with st.expander('Unique values per column and their counts'):
+
+    st.header('')
+
+    for col in cols:
+        st.subheader(col)
+        st.write(data[col].value_counts())
+
+st.header('')
+st.header('')
 
 data_numeric = data[cols].copy()
 sample = data.sample(n=1000, random_state=10)
@@ -180,6 +191,9 @@ with st.expander('Boxplots for all features against Failure Types'):
 st.header('')
 st.header('')
 
+st.subheader('Pairplots of failure instances against feature pairs')
+st.header('')
+
 plot = sns.pairplot(data, height=2.5, hue='Failure Type')
 st.pyplot(plot)
 
@@ -188,15 +202,6 @@ st.header('')
 st.write("--------------------------------------------------------")
 st.header('')
 
-st.write('Failure percentage in data')
-st.write(data['Target'].value_counts(normalize=1) * 100)
-st.header('')
-st.write('The data appears to be extremely unbalanced in regards to the amount of recorded failures so it will need '
-         'to be oversampled')
-st.write('In order to avoid a data leak we will have to remove either Target or Failure Types. I have chosen to keep'
-         ' Failure types as it provides more detailed information on the nature of the failures.')
-
-data_numeric.drop(columns=['Target'], inplace=True)
 regex = re.compile(r"\[|\]|<", re.IGNORECASE)
 
 data_numeric.columns = [regex.sub("_", col) if any(x in str(col) for x in {'[', ']', '<'})
@@ -228,7 +233,7 @@ weight_test = compute_sample_weight('balanced', y_test)
 
 st.write("--------------------------------------------------------")
 
-st.header('Training models and comparing results')
+st.header('Model Training and Testing')
 st.header('')
 
 # XGBoost
@@ -362,7 +367,7 @@ models = pd.DataFrame({
         [xgb_data, log_data, decision_data, random_forest_data, svc_data],
 
     'Model Accuracy Score': [
-        xgb_accuracy, log_accuracy, decision_accuracy, random_forest_accuracy,  svc_accuracy ]
+        xgb_accuracy, log_accuracy, decision_accuracy, random_forest_accuracy,  svc_accuracy]
 })
 
 st.header('')
@@ -442,7 +447,7 @@ for i in range(len(rul_data)):
         else:
             next_failure_index = next_failure_indices[0]
             time_until_failure = (next_failure_index - i) % len(rul_data)
-            rul_data.loc[i, f'RUL_{failure_type}'] = time_until_failure
+            rul_data.loc[i, f'RUL_{failure_type}'] = time_until_failure * 2
 
 st.header('Creating RUL predictions for all failure types using the trained model:')
 st.header('')
